@@ -1,0 +1,617 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>SmartRoad AI — Road Surface Intelligence</title>
+
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&family=Roboto+Mono:wght@400;500&display=swap" rel="stylesheet">
+
+    <style>
+        :root {
+            --bg: #12161a;
+            --panel: #1a2027;
+            --panel-2: #212932;
+            --line: #2b333c;
+
+            --text: #eef1f2;
+            --text-dim: #8fa0a8;
+
+            --accent: #ffc93c;
+            --accent-cy: #57d9c7;
+            --alert: #ff6b4a;
+
+            --font-display: 'Oswald', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'Roboto Mono', monospace;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--font-body);
+            line-height: 1.5;
+            overflow-x: hidden;
+        }
+
+        a {
+            color: inherit;
+        }
+
+        /* ================= NAV ================= */
+        nav {
+            height: 76px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 6%;
+            background: rgba(18, 22, 26, .92);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border-bottom: 1px solid var(--line);
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            z-index: 50;
+        }
+
+        .logo {
+            font-family: var(--font-display);
+            font-size: 21px;
+            font-weight: 700;
+            letter-spacing: .02em;
+            text-transform: uppercase;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo .dash {
+            width: 22px;
+            height: 3px;
+            background: var(--accent);
+            display: inline-block;
+            border-radius: 2px;
+        }
+
+        .logo span {
+            color: var(--accent-cy);
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 28px;
+            align-items: center;
+        }
+
+        .nav-links a {
+            text-decoration: none;
+            color: var(--text-dim);
+            font-size: 14px;
+            font-weight: 500;
+            transition: color .2s;
+        }
+
+        .nav-links a:hover {
+            color: var(--text);
+        }
+
+        .login-btn {
+            color: var(--text) !important;
+            font-size: 14px !important;
+            font-weight: 600 !important;
+            cursor: pointer;
+            transition: color 0.2s ease;
+        }
+
+        .login-btn:hover {
+            color: var(--accent) !important;
+        }
+
+        .signup-btn {
+            padding: 10px 20px;
+            background: var(--accent);
+            color: #161b1f !important;
+            border-radius: 6px;
+            font-weight: 700 !important;
+            font-family: var(--font-mono);
+            font-size: 12.5px !important;
+            letter-spacing: .04em;
+            text-transform: uppercase;
+            text-decoration: none;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .signup-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 6px 18px rgba(255, 201, 60, .25);
+        }
+
+        /* ================= FIRST SCREEN: ONLY CAR VIDEO ================= */
+        .fullscreen-video-container {
+            position: relative;
+            width: 100vw;
+            height: 100vh;
+            overflow: hidden;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding-bottom: 35px;
+        }
+
+        #bgCarVideo {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+        }
+
+        .video-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(
+                180deg, 
+                rgba(18, 22, 26, 0.75) 0%, 
+                transparent 25%, 
+                transparent 70%, 
+                rgba(18, 22, 26, 0.95) 100%
+            );
+            z-index: 2;
+        }
+
+        .scroll-down-btn {
+            position: relative;
+            z-index: 10;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            text-decoration: none;
+            color: var(--accent);
+            font-family: var(--font-mono);
+            font-size: 12px;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            animation: bounce 2s infinite;
+        }
+
+        .mouse-icon {
+            width: 24px;
+            height: 38px;
+            border: 2px solid var(--accent);
+            border-radius: 12px;
+            position: relative;
+        }
+
+        .mouse-icon::after {
+            content: '';
+            position: absolute;
+            top: 6px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 4px;
+            height: 8px;
+            background: var(--accent);
+            border-radius: 2px;
+            animation: wheel 1.5s infinite;
+        }
+
+        @keyframes bounce {
+            0%, 20%, 50%, 80%, 100% { transform: translateY(0); }
+            40% { transform: translateY(-8px); }
+            60% { transform: translateY(-4px); }
+        }
+
+        @keyframes wheel {
+            0% { opacity: 1; top: 6px; }
+            100% { opacity: 0; top: 18px; }
+        }
+
+        /* ================= SCROLL SECTION ================= */
+        .content-body {
+            position: relative;
+            background: var(--bg);
+            z-index: 10;
+        }
+
+        .hero {
+            min-height: 600px;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 60px;
+            padding: 80px 6% 70px;
+            position: relative;
+        }
+
+        .hero-content {
+            max-width: 580px;
+        }
+
+        .badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 7px 14px;
+            border-radius: 30px;
+            border: 1px solid var(--line);
+            background: var(--panel);
+            margin-bottom: 26px;
+            font-family: var(--font-mono);
+            font-size: 12px;
+            color: var(--accent-cy);
+            letter-spacing: .05em;
+        }
+
+        .badge .dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: var(--accent-cy);
+            box-shadow: 0 0 8px var(--accent-cy);
+        }
+
+        .hero h1 {
+            font-size: 56px;
+            line-height: 1.08;
+            margin-bottom: 22px;
+            text-transform: uppercase;
+        }
+
+        .hero h1 em {
+            font-style: normal;
+            color: transparent;
+            -webkit-text-stroke: 1.5px var(--accent);
+        }
+
+        .hero p {
+            font-size: 17px;
+            line-height: 1.75;
+            color: var(--text-dim);
+            margin-bottom: 34px;
+            max-width: 480px;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 14px;
+            flex-wrap: wrap;
+        }
+
+        .primary-btn,
+        .secondary-btn {
+            padding: 14px 24px;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-family: var(--font-mono);
+            font-size: 13px;
+            letter-spacing: .03em;
+            text-transform: uppercase;
+            transition: transform .15s ease, box-shadow .15s ease;
+        }
+
+        .primary-btn {
+            background: var(--accent);
+            color: #161b1f;
+        }
+
+        .primary-btn:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 8px 20px rgba(255, 201, 60, .22);
+        }
+
+        .secondary-btn {
+            border: 1px solid var(--line);
+            color: var(--text);
+            background: var(--panel);
+        }
+
+        .secondary-btn:hover {
+            border-color: var(--accent-cy);
+            color: var(--accent-cy);
+        }
+
+        /* LIVE AI MONITOR */
+        .live-monitor {
+            margin-top: 28px;
+            padding: 14px 16px;
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: rgba(26, 32, 39, .75);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 15px;
+            font-family: var(--font-mono);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .monitor-left {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .live-dot {
+            width: 9px;
+            height: 9px;
+            border-radius: 50%;
+            background: var(--accent-cy);
+            box-shadow: 0 0 12px var(--accent-cy);
+            animation: liveGlow 1.2s infinite;
+        }
+
+        .monitor-text {
+            font-size: 11px;
+            color: var(--accent-cy);
+            letter-spacing: .08em;
+        }
+
+        .monitor-frame {
+            color: var(--text-dim);
+            font-size: 10px;
+        }
+
+        .monitor-bar {
+            position: absolute;
+            left: 0;
+            bottom: 0;
+            height: 2px;
+            width: 35%;
+            background: var(--accent-cy);
+            box-shadow: 0 0 12px var(--accent-cy);
+            animation: monitorProgress 2.5s linear infinite;
+        }
+
+        /* STATS HUD */
+        .stats-hud {
+            width: 440px;
+            background: var(--panel);
+            border: 1px solid var(--line);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 20px 50px rgba(0,0,0,0.4);
+        }
+
+        .hud-head {
+            padding: 14px 18px;
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            display: flex;
+            justify-content: space-between;
+            border-bottom: 1px solid var(--line);
+        }
+
+        .hud-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1px;
+            background: var(--line);
+        }
+
+        .hud-item {
+            background: var(--panel);
+            padding: 22px 20px;
+        }
+
+        .hud-item .lbl {
+            font-family: var(--font-mono);
+            font-size: 11px;
+            color: var(--text-dim);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .hud-item .val {
+            font-family: var(--font-mono);
+            font-size: 26px;
+            font-weight: 700;
+        }
+
+        .val.cy { color: var(--accent-cy); }
+        .val.al { color: var(--alert); }
+
+        footer {
+            padding: 28px 6%;
+            border-top: 1px solid var(--line);
+            color: var(--text-dim);
+            font-size: 13px;
+            display: flex;
+            justify-content: space-between;
+            font-family: var(--font-mono);
+        }
+
+        @keyframes liveGlow {
+            0%, 100% { opacity: .4; transform: scale(.8); }
+            50% { opacity: 1; transform: scale(1.2); }
+        }
+
+        @keyframes monitorProgress {
+            0% { left: -35%; }
+            100% { left: 100%; }
+        }
+
+        @media (max-width: 960px) {
+            .hero {
+                flex-direction: column;
+                text-align: center;
+            }
+            .hero-buttons {
+                justify-content: center;
+            }
+            .stats-hud {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= NAVBAR ================= -->
+    <nav>
+        <div class="logo">
+            <span class="dash"></span>
+            SmartRoad
+            <span>AI</span>
+        </div>
+
+        <div class="nav-links">
+            <a href="#home">Home</a>
+            <a href="#details">Platform</a>
+            <a href="#details">Process</a>
+            
+            <!-- Standard Login Option: Har kisi ko login page par le jayega -->
+            <a href="{% url 'login' %}" class="login-btn">
+                Log in
+            </a>
+
+            <!-- Registration / Demo Option -->
+            <a href="{% url 'login' %}" class="signup-btn">
+                Request Demo
+            </a>
+        </div>
+    </nav>
+
+    <!-- ================= 1. FIRST SCREEN: ONLY CLEAN CAR VIDEO ================= -->
+    <div class="fullscreen-video-container" id="home">
+        <video id="bgCarVideo" autoplay muted loop playsinline>
+            <!-- <source src="/static/videos/videoone.mp4" type="video/mp4"> -->
+            <source src="{% static 'videos/videoone.mp4' %}" type="video/mp4">
+            Your browser does not support HTML5 video.
+        </video>
+        <div class="video-overlay"></div>
+
+        <a href="#details" class="scroll-down-btn">
+            <div class="mouse-icon"></div>
+            <span>Scroll Down</span>
+        </a>
+    </div>
+
+    <!-- ================= 2. SCROLL DOWN DETAILS ================= -->
+    <div class="content-body" id="details">
+        <section class="hero">
+            <div class="hero-content">
+                <div class="badge">
+                    <span class="dot"></span>
+                    Road Surface Intelligence
+                </div>
+
+                <h1>
+                    See every crack
+                    <br>
+                    before it becomes
+                    <em>a pothole</em>
+                </h1>
+
+                <p>
+                    SmartRoad AI scans dashcam and fleet footage frame by frame,
+                    flags cracking, rutting, and pothole formation early, and
+                    ranks every defect so crews fix what matters first.
+                </p>
+
+                <div class="hero-buttons">
+                    <a href="{% url 'login' %}" class="primary-btn">
+                        Log In to Console →
+                    </a>
+                    <a href="{% url 'login' %}" class="secondary-btn">
+                        Explore Platform
+                    </a>
+                </div>
+
+                <!-- LIVE AI MONITOR -->
+                <div class="live-monitor">
+                    <div class="monitor-left">
+                        <span class="live-dot"></span>
+                        <span class="monitor-text">AI SYSTEM ONLINE</span>
+                    </div>
+                    <span class="monitor-frame">
+                        FRAME <span id="frameNumber">12,508</span>
+                    </span>
+                    <div class="monitor-bar"></div>
+                </div>
+            </div>
+
+            <!-- RIGHT SIDE STATS HUD -->
+            <div class="stats-hud">
+                <div class="hud-head">
+                    <span>SEGMENT 14 · MG ROAD</span>
+                    <span style="color:var(--accent-cy);">● MONITORING</span>
+                </div>
+                <div class="hud-grid">
+                    <div class="hud-item">
+                        <div class="lbl">Surface Score</div>
+                        <div class="val cy">8.4</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="lbl">Defects Flagged</div>
+                        <div class="val al">132</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="lbl">KM Scanned Today</div>
+                        <div class="val">4,208</div>
+                    </div>
+                    <div class="hud-item">
+                        <div class="lbl">Crews Dispatched</div>
+                        <div class="val cy">17</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- FOOTER -->
+        <footer>
+            <div>© 2026 <strong>SmartRoad AI</strong></div>
+            <div>Road intelligence, mapped block by block.</div>
+        </footer>
+    </div>
+
+    <!-- SCRIPT -->
+    <script>
+        window.addEventListener("DOMContentLoaded", () => {
+            const vid = document.getElementById("bgCarVideo");
+            if (vid) {
+                vid.muted = true;
+                vid.play().catch(() => {});
+            }
+        });
+
+        let frame = 12508;
+        setInterval(() => {
+            frame += Math.floor(Math.random() * 8) + 1;
+            const frameNumber = document.getElementById("frameNumber");
+            if (frameNumber) {
+                frameNumber.textContent = frame.toLocaleString();
+            }
+        }, 700);
+    </script>
+
+</body>
+
+</html>

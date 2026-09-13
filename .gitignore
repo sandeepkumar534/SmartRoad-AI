@@ -1,0 +1,35 @@
+# ─── Python ──────────────────────────────────────────────
+.venv/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.egg-info/
+dist/
+build/
+*.egg
+
+# ─── IDE / OS ────────────────────────────────────────────
+.env
+*.log
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
+
+# ─── Model Weights (auto-downloaded, do not commit) ─────
+models/*.pt
+
+# ─── Generated Outputs (reproducible, do not commit) ────
+output/
+
+# ─── Data ────────────────────────────────────────────────
+input/*.mp4
+input/*.avi
+input/*.mov
+input/*.mkv
+
+# Local database and uploaded media
+db.sqlite3
+media/
+staticfiles/

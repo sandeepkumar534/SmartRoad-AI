@@ -1,0 +1,27 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SmartRoad AI - Profile</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: Arial, sans-serif; }
+        body { background: #0f172a; color: #f8fafc; padding: 40px; }
+        .profile-container { max-width: 650px; margin: auto; background: #1e293b; padding: 30px; border-radius: 16px; border: 1px solid #334155; }
+        h1 { margin-bottom: 20px; color: #38bdf8; font-size: 24px; border-bottom: 1px solid #334155; padding-bottom: 10px; }
+        .info-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px solid #334155; }
+        .info-label { color: #94a3b8; font-weight: bold; }
+        .back-btn { display: inline-block; margin-top: 25px; padding: 10px 20px; background: #2563eb; color: white; text-decoration: none; border-radius: 8px; font-weight: bold; }
+    </style>
+</head>
+<body>
+    <div class="profile-container">
+        <h1>👤 My Profile</h1>
+        <div class="info-row"><span class="info-label">Username:</span><span>{{ request.user.username }}</span></div>
+        <div class="info-row"><span class="info-label">Email:</span><span>{{ request.user.email }}</span></div>
+        <div class="info-row"><span class="info-label">Account Created:</span><span>{{ request.user.date_joined|date:"M d, Y" }}</span></div>
+        <div class="info-row"><span class="info-label">Status:</span><span style="color:#16a34a;">Active</span></div>
+        <a href="{% url 'dashboard' %}" class="back-btn">← Back to Dashboard</a>
+    </div>
+</body>
+</html>

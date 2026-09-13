@@ -1,0 +1,839 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SmartRoad AI - Video Analysis Result</title>
+
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background: #f4f7fb;
+            color: #1e293b;
+        }
+
+        /* ================= SIDEBAR ================= */
+        .sidebar {
+            position: fixed;
+            left: 0;
+            top: 0;
+            width: 240px;
+            height: 100vh;
+            background: #111827;
+            padding: 25px 18px;
+        }
+
+        .logo {
+            color: white;
+            font-size: 24px;
+            font-weight: bold;
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        .logo span {
+            color: #00d4ff;
+        }
+
+        .menu a {
+            display: block;
+            color: #cbd5e1;
+            text-decoration: none;
+            padding: 14px 18px;
+            margin-bottom: 8px;
+            border-radius: 10px;
+            transition: 0.3s;
+        }
+
+        .menu a:hover,
+        .menu .active {
+            background: #2563eb;
+            color: white;
+        }
+
+        .logout {
+            position: absolute;
+            bottom: 25px;
+            left: 18px;
+            right: 18px;
+        }
+
+        .logout a {
+            display: block;
+            text-align: center;
+            background: #dc2626;
+            color: white;
+            text-decoration: none;
+            padding: 12px;
+            border-radius: 10px;
+        }
+
+        .logout a:hover {
+            background: #b91c1c;
+        }
+
+        /* ================= MAIN ================= */
+        .main {
+            margin-left: 240px;
+            padding: 30px;
+        }
+
+        /* ================= HEADER ================= */
+        .page-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .page-header h1 {
+            font-size: 28px;
+            color: #0f172a;
+            margin-bottom: 8px;
+        }
+
+        .page-header p {
+            color: #64748b;
+            font-size: 14px;
+        }
+
+        /* ================= RESULT CONTAINER ================= */
+        .result-container {
+            max-width: 950px;
+            margin: auto;
+            background: white;
+            padding: 25px;
+            border-radius: 18px;
+            box-shadow: 0 5px 25px rgba(0, 0, 0, 0.08);
+        }
+
+        /* ================= VIDEO CONTAINER ================= */
+        .video-container {
+            width: 100%;
+            background: #000;
+            border-radius: 12px;
+            overflow: hidden;
+            margin-bottom: 25px;
+            box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .video-container video {
+            width: 100%;
+            max-height: 520px;
+            display: block;
+            object-fit: contain;
+        }
+
+        .no-video {
+            padding: 40px;
+            text-align: center;
+            color: #64748b;
+            background: #f8fafc;
+            border: 1px dashed #cbd5e1;
+            border-radius: 12px;
+            margin-bottom: 25px;
+        }
+
+        /* ================= SECTION TITLE ================= */
+        .section-title {
+            font-size: 15px;
+            color: #334155;
+            font-weight: bold;
+            margin-bottom: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        /* ================= METRICS GRID ================= */
+        .detection-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .detection-card {
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 10px;
+            padding: 18px;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+        }
+
+        .detection-card h3 {
+            font-size: 12px;
+            color: #64748b;
+            text-transform: uppercase;
+            margin-bottom: 8px;
+        }
+
+        .detection-card .number {
+            font-size: 26px;
+            font-weight: bold;
+        }
+
+        .total-potholes {
+            border-top: 4px solid #2563eb;
+        }
+
+        .total-potholes .number {
+            color: #2563eb;
+        }
+
+        .minor {
+            border-top: 4px solid #16a34a;
+        }
+
+        .minor .number {
+            color: #16a34a;
+        }
+
+        .moderate {
+            border-top: 4px solid #f97316;
+        }
+
+        .moderate .number {
+            color: #f97316;
+        }
+
+        .severe {
+            border-top: 4px solid #dc2626;
+        }
+
+        .severe .number {
+            color: #dc2626;
+        }
+
+        .psi-card {
+            border-top: 4px solid #0284c7;
+        }
+
+        .psi-card .number {
+            color: #0284c7;
+        }
+
+        .segment-card {
+            border-top: 4px solid #9333ea;
+        }
+
+        .segment-card .number {
+            color: #9333ea;
+        }
+
+        /* ================= SEVERITY & CONDITION ================= */
+        .summary-box {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+            margin-bottom: 20px;
+        }
+
+        .info-card {
+            padding: 18px;
+            border-radius: 10px;
+            border: 1px solid #e2e8f0;
+        }
+
+        .info-card.severity-box {
+            background: #fff7ed;
+            border-color: #ffedd5;
+            border-left: 5px solid #ea580c;
+        }
+
+        .info-card.psi-box {
+            background: #f8fafc;
+            border-left: 5px solid var(--status-color, #dc2626);
+        }
+
+        .info-label {
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+
+        .severity-box .info-label {
+            color: #c2410c;
+        }
+
+        .psi-box .info-label {
+            color: var(--status-color, #dc2626);
+        }
+
+        .status-heading {
+            font-size: 20px;
+            margin-bottom: 6px;
+            font-weight: bold;
+            color: var(--status-color, #dc2626);
+        }
+
+        .info-card h2 {
+            font-size: 20px;
+            margin-bottom: 6px;
+        }
+
+        .info-card p {
+            font-size: 13px;
+            color: #475569;
+            line-height: 1.5;
+        }
+
+        /* ================= LOCATION ================= */
+        .location-box {
+            padding: 20px;
+            border-radius: 10px;
+            background: #f8fafc;
+            border: 1px solid #e2e8f0;
+            border-top: 4px solid #2563eb;
+            margin-bottom: 20px;
+        }
+
+        .location-title {
+            font-size: 11px;
+            font-weight: bold;
+            color: #64748b;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 6px;
+        }
+
+        .road-name {
+            font-size: 20px;
+            font-weight: bold;
+            color: #0f172a;
+            margin-bottom: 14px;
+        }
+
+        .coordinates {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin-bottom: 14px;
+        }
+
+        .coordinate {
+            background: white;
+            border: 1px solid #e2e8f0;
+            padding: 10px 14px;
+            border-radius: 8px;
+        }
+
+        .coordinate-label {
+            display: block;
+            font-size: 11px;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+
+        .coordinate-value {
+            color: #0f172a;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .map-btn {
+            display: inline-block;
+            background: #2563eb;
+            color: white;
+            text-decoration: none;
+            padding: 10px 18px;
+            border-radius: 7px;
+            font-size: 13px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .map-btn:hover {
+            background: #1d4ed8;
+        }
+
+        .no-location {
+            padding: 12px;
+            background: #fff7ed;
+            border: 1px solid #fed7aa;
+            border-radius: 8px;
+            color: #c2410c;
+            font-size: 13px;
+        }
+
+        /* ================= BUTTONS ================= */
+        .buttons {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 12px 22px;
+            border-radius: 8px;
+            text-decoration: none;
+            color: white;
+            font-size: 14px;
+            font-weight: bold;
+            transition: 0.2s;
+            border: none;
+            cursor: pointer;
+        }
+
+        .dashboard-btn {
+            background: #475569;
+        }
+
+        .dashboard-btn:hover {
+            background: #334155;
+        }
+
+        .pdf-btn {
+            background: #e11d48;
+        }
+
+        .pdf-btn:hover {
+            background: #be123c;
+        }
+
+        .download-btn {
+            background: #0284c7;
+        }
+
+        .download-btn:hover {
+            background: #0369a1;
+        }
+
+        .analyze-btn {
+            background: #16a34a;
+        }
+
+        .analyze-btn:hover {
+            background: #15803d;
+        }
+
+        /* ================= DISPATCH BUTTON ================= */
+        .dispatch-btn {
+            background: #ea580c;
+        }
+
+        .dispatch-btn:hover {
+            background: #c2410c;
+        }
+
+        .ticket-btn {
+            background: #059669;
+            cursor: default;
+        }
+
+        /* ================= RESPONSIVE ================= */
+        @media (max-width: 900px) {
+            .sidebar {
+                width: 190px;
+            }
+
+            .main {
+                margin-left: 190px;
+            }
+
+            .detection-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 650px) {
+            .sidebar {
+                position: relative;
+                width: 100%;
+                height: auto;
+            }
+
+            .logout {
+                position: relative;
+                left: auto;
+                right: auto;
+                bottom: auto;
+                margin-top: 20px;
+            }
+
+            .main {
+                margin-left: 0;
+                padding: 15px;
+            }
+
+            .detection-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .summary-box {
+                grid-template-columns: 1fr;
+            }
+
+            .coordinates {
+                grid-template-columns: 1fr;
+            }
+
+            .buttons {
+                flex-direction: column;
+            }
+
+            .btn {
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- ================= SIDEBAR ================= -->
+    <div class="sidebar">
+
+        <div class="logo">
+            Smart<span>Road</span> AI
+        </div>
+
+        <div class="menu">
+
+            <a href="{% url 'dashboard' %}">
+                🏠 Dashboard
+            </a>
+
+            <a href="{% url 'dashboard' %}#upload" class="active">
+                🎥 Scan Road
+            </a>
+
+            <a href="{% url 'dashboard' %}#history">
+                📊 Scan History
+            </a>
+
+            <a href="{% url 'profile' %}">
+                👤 Profile
+            </a>
+
+        </div>
+
+        <div class="logout">
+            <a href="{% url 'logout' %}">
+                Logout
+            </a>
+        </div>
+
+    </div>
+
+
+    <!-- ================= MAIN CONTENT ================= -->
+    <div class="main">
+
+        <div class="page-header">
+
+            <h1>🎥 Road Video Analysis Result</h1>
+
+            <p>
+                SmartRoad AI tracked and assessed defects throughout the video sequence.
+            </p>
+
+        </div>
+
+
+        <div class="result-container">
+
+            <!-- ================= VIDEO PLAYER ================= -->
+            {% if video_url %}
+
+                <div class="video-container">
+
+                    <video controls autoplay muted playsinline>
+
+                        <source src="{{ video_url }}" type="video/mp4">
+
+                        Your browser does not support the video tag.
+
+                    </video>
+
+                </div>
+
+            {% else %}
+
+                <div class="no-video">
+
+                    ⚠️ Analyzed video is not available or processing failed.
+
+                </div>
+
+            {% endif %}
+
+
+            <!-- ================= DEFECT TRACKING METRICS ================= -->
+            <div class="section-title">
+                Defect Tracking & Severity Metrics
+            </div>
+
+
+            <div class="detection-grid">
+
+                <!-- UNIQUE POTHOLES -->
+                <div class="detection-card total-potholes">
+
+                    <h3>🕳️ Unique Potholes</h3>
+
+                    <div class="number">
+                        {{ total_unique_potholes|default:0 }}
+                    </div>
+
+                </div>
+
+
+                <!-- MINOR -->
+                <div class="detection-card minor">
+
+                    <h3>🟢 Minor Severity</h3>
+
+                    <div class="number">
+                        {{ total_minor|default:0 }}
+                    </div>
+
+                </div>
+
+
+                <!-- MODERATE -->
+                <div class="detection-card moderate">
+
+                    <h3>🟠 Moderate Severity</h3>
+
+                    <div class="number">
+                        {{ total_moderate|default:0 }}
+                    </div>
+
+                </div>
+
+
+                <!-- SEVERE -->
+                <div class="detection-card severe">
+
+                    <h3>🔴 Severe Potholes</h3>
+
+                    <div class="number">
+                        {{ total_severe|default:0 }}
+                    </div>
+
+                </div>
+
+
+                <!-- WORST SEGMENT -->
+                <div class="detection-card segment-card">
+
+                    <h3>📍 Worst Segment</h3>
+
+                    <div class="number">
+                        #{{ worst_segment|default:"-" }}
+                    </div>
+
+                </div>
+
+
+                <!-- PSI -->
+                <div class="detection-card psi-card">
+
+                    <h3>📈 Serviceability Index (PSI)</h3>
+
+                    <div class="number">
+                        {{ psi|default:"0.0" }}
+                    </div>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= DYNAMIC SUMMARY & CONDITION ================= -->
+            <div class="summary-box">
+
+                <div class="info-card severity-box">
+
+                    <div class="info-label">
+                        Severity Assessment
+                    </div>
+
+                    <h2>
+                        {{ average_severity|default:"Moderate Damage" }}
+                    </h2>
+
+                    <p>
+                        Severe potholes account for
+                        <strong>{{ severe_percent|default:0 }}%</strong>
+                        of the total tracked damage along this stretch.
+                    </p>
+
+                </div>
+
+
+                <div class="info-card psi-box"
+                     style="--status-color: {{ road_status_color|default:'#dc2626' }};">
+
+                    <div class="info-label">
+                        Road Serviceability Status
+                    </div>
+
+                    <div class="status-heading">
+                        {{ road_status_title|default:"Critical / Poor Condition" }}
+                    </div>
+
+                    <p>
+                        {{ road_status_desc|default:"High concentration of severe potholes detected. Immediate resurfacing required." }}
+                    </p>
+
+                </div>
+
+            </div>
+
+
+            <!-- ================= LOCATION DETAILS ================= -->
+            <div class="location-box">
+
+                <div class="location-title">
+                    📍 Inspected Road Location
+                </div>
+
+                <div class="road-name">
+                    {{ road_location|default:"Outer Ring Road, Bengaluru" }}
+                </div>
+
+
+                {% if latitude and longitude %}
+
+                    <div class="coordinates">
+
+                        <div class="coordinate">
+
+                            <span class="coordinate-label">
+                                Latitude
+                            </span>
+
+                            <span class="coordinate-value">
+                                {{ latitude }}
+                            </span>
+
+                        </div>
+
+
+                        <div class="coordinate">
+
+                            <span class="coordinate-label">
+                                Longitude
+                            </span>
+
+                            <span class="coordinate-value">
+                                {{ longitude }}
+                            </span>
+
+                        </div>
+
+                    </div>
+
+
+                    <a href="https://www.google.com/maps?q={{ latitude }},{{ longitude }}"
+                       target="_blank"
+                       rel="noopener noreferrer"
+                       class="map-btn">
+
+                        🗺️ View Road Location in Google Maps
+
+                    </a>
+
+                {% else %}
+
+                    <div class="no-location">
+
+                        ⚠️ Coordinates were not tagged for this scan.
+
+                    </div>
+
+                {% endif %}
+
+            </div>
+
+
+            <!-- ================= ACTION BUTTONS ================= -->
+            <div class="buttons">
+
+                <!-- BACK TO DASHBOARD -->
+                <a href="{% url 'dashboard' %}"
+                   class="btn dashboard-btn">
+
+                    ← Back to Dashboard
+
+                </a>
+
+
+                {% if report_id %}
+
+                    <!-- DOWNLOAD PDF REPORT -->
+                    <a href="{% url 'download_pdf_report' report_id %}"
+                       class="btn pdf-btn">
+
+                        📄 Download PDF Report
+
+                    </a>
+
+
+                    {% if ticket_id %}
+
+                        <!-- TICKET ALREADY LODGED -->
+                        <span class="btn ticket-btn">
+
+                            ✅ Ticket: {{ ticket_id }}
+
+                        </span>
+
+                    {% else %}
+
+                        <!-- REPORT TO AUTHORITY -->
+                        <a href="{% url 'dispatch_report' report_id %}"
+                           class="btn dispatch-btn"
+                           onclick="return confirm('Lodge this inspection directly to the Municipal Road Maintenance Cell?');">
+
+                            🏛️ Report to Authority
+
+                        </a>
+
+                    {% endif %}
+
+                {% endif %}
+
+
+                {% if video_url %}
+
+                    <!-- DOWNLOAD OUTPUT VIDEO -->
+                    <a href="{{ video_url }}"
+                       download="annotated_road_scan.mp4"
+                       class="btn download-btn">
+
+                        ⬇️ Download Output Video
+
+                    </a>
+
+                {% endif %}
+
+
+                <!-- SCAN ANOTHER VIDEO -->
+                <a href="{% url 'dashboard' %}#upload"
+                   class="btn analyze-btn">
+
+                    🎥 Scan Another Video
+
+                </a>
+
+            </div>
+
+        </div>
+
+    </div>
+
+</body>
+
+</html>
